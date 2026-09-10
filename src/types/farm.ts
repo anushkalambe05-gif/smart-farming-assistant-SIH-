@@ -1,12 +1,17 @@
-export type TabType = 
+export type AppView = 
   | 'dashboard'
-  | 'monitoring'
-  | 'edge-ai'
+  | 'my-farm'
+  | 'zones'
+  | 'cameras'
+  | 'sensors'
+  | 'ai-insights'
   | 'irrigation'
-  | 'analytics'
+  | 'problems'
+  | 'solutions'
+  | 'environment'
   | 'alerts'
-  | 'advisory'
-  | 'ask-ai';
+  | 'analytics'
+  | 'settings';
 
 export type ZoneId = 'zone-1' | 'zone-2';
 
@@ -18,19 +23,24 @@ export interface ZoneData {
   soilMoisture: number; // percentage
   temperature: number; // °C
   humidity: number; // percentage
+  soilTemperature: number; // °C
+  waterStatus: 'Optimal' | 'Low' | 'Adequate';
   light: number; // percentage
   rainfall: string;
   cropHealth: number; // percentage
   cropType: string;
+  area: string;
   disease: string;
   diseaseConfidence?: number;
   diseaseSeverity?: 'None' | 'Mild' | 'Moderate' | 'Severe';
   cameraStatus: 'online' | 'offline' | 'standby';
   sensorStatus: 'online' | 'offline' | 'standby';
   pumpStatus: 'OFF' | 'ON';
+  irrigationRecommendation: 'OFF' | 'RECOMMENDED' | 'ACTIVE';
   lastUpdated: string;
   loRaSignalDbm: number;
   batteryLevel: number;
+  aiRecommendationText: string;
 }
 
 export interface FarmSummary {
@@ -38,39 +48,54 @@ export interface FarmSummary {
   zonesCount: number;
   crop: string;
   overallCropHealth: number;
+  soilMoisture: number;
+  temperature: number;
+  humidity: number;
+  soilTemperature: number;
+  waterUsageLiters: number;
+  weatherCondition: string;
+  weatherTemp: number;
+  connectivity: string;
   edgeAiStatus: 'online' | 'offline' | 'degraded';
+  irrigationStatus: 'Optimal' | 'Action Needed' | 'Irrigating';
   activeAlertsCount: number;
   offlineReady: boolean;
 }
 
-export interface SensorOverview {
-  soilMoisture: number;
-  temperature: number;
-  humidity: number;
-  light: number;
-  rainfall: string;
+export interface SensorDataPoint {
+  id: string;
+  name: string;
+  value: string | number;
+  unit: string;
+  status: 'optimal' | 'normal' | 'attention';
+  history: number[];
+  lastUpdated: string;
+  description: string;
 }
 
-export interface AiDetectionResult {
-  disease: string;
-  confidence: number;
+export interface AiVisionAnalysis {
+  cropDetected: string;
+  cropCondition: string;
+  diseaseProbability: number;
+  pestProbability: number;
+  waterStress: 'Low' | 'Moderate' | 'High';
+  modelLatencyMs: number;
+  lastScanned: string;
+}
+
+export interface CameraFeedItem {
+  id: string;
+  title: string;
   zone: string;
   zoneId: ZoneId;
-  severity: string;
-  detectedAt: string;
-  recommendation: string;
-  model: string;
-  latencyMs: number;
-  hardwareTarget: string;
-  affectedPlantType: string;
-  symptoms: string[];
+  status: 'LIVE' | 'STANDBY';
+  imageUrl: string;
+  analysis: AiVisionAnalysis;
 }
-
-export type AlertSeverity = 'critical' | 'warning' | 'advisory' | 'normal';
 
 export interface AlertItem {
   id: string;
-  severity: AlertSeverity;
+  severity: 'critical' | 'warning' | 'advisory' | 'normal';
   title: string;
   description: string;
   zone: string;
@@ -78,20 +103,35 @@ export interface AlertItem {
   timestamp: string;
   isRead: boolean;
   actionLabel?: string;
-  actionTab?: TabType;
+  actionView?: AppView;
 }
 
-export interface AdvisoryItem {
+export interface ActivityItem {
   id: string;
-  category: 'crop-health' | 'water-management' | 'disease-management' | 'weather';
-  icon: string;
-  title: string;
-  recommendation: string;
-  zone: string;
-  zoneId?: ZoneId;
-  priority: 'high' | 'medium' | 'low';
-  actionPrompt: string;
-  actionTab: TabType;
+  time: string;
+  description: string;
+  type: 'ai' | 'sensor' | 'irrigation' | 'camera';
+}
+
+export interface WeatherData {
+  temp: number;
+  condition: string;
+  humidity: number;
+  rainProbability: number;
+  windSpeed: string;
+}
+
+export interface FarmSettings {
+  farmName: string;
+  farmSize: string;
+  cropType: string;
+  zoneConfiguration: string;
+  irrigationThreshold: number; // e.g. 45%
+  aiSensitivity: 'Standard' | 'High' | 'Low';
+  scanFrequency: 'Every 30 Mins' | 'Hourly' | 'Twice Daily';
+  offlineMode: boolean;
+  smsAlerts: boolean;
+  audioBuzzer: boolean;
 }
 
 export interface HistoricalDataPoint {
@@ -104,13 +144,24 @@ export interface HistoricalDataPoint {
   waterUsageLiters: number;
 }
 
+export interface ChatActionButton {
+  label: string;
+  actionId: 'start-irrigation' | 'open-zone-2' | 'open-zone-1' | 'open-camera-2' | 'open-camera-1' | 'run-ai-scan' | 'view-alerts' | 'view-environment' | 'show-todays-actions';
+  primary?: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   sender: 'farmer' | 'ai';
   text: string;
   timestamp: string;
-  suggestedAction?: {
-    label: string;
-    tab: TabType;
-  };
+  actionButtons?: ChatActionButton[];
+}
+
+export interface ScaledAsset {
+  id: string;
+  type: 'zone' | 'sensor' | 'camera';
+  name: string;
+  location: string;
+  addedAt: string;
 }

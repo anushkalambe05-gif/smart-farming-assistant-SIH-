@@ -1,118 +1,108 @@
 import React, { useState } from 'react';
 import { FarmProvider, useFarm } from './context/FarmContext';
-import { Sidebar } from './components/layout/Sidebar';
-import { Header } from './components/layout/Header';
-import { MobileNav } from './components/layout/MobileNav';
+import { WelcomeScreen } from './components/app/WelcomeScreen';
+import { AppSidebar } from './components/app/AppSidebar';
+import { AppHeader } from './components/app/AppHeader';
+import { AppMobileNav } from './components/app/AppMobileNav';
 import { ToastContainer } from './components/common/Toast';
-import { CameraFeedModal } from './components/farm/CameraFeedModal';
-import { ZoneDetailModal } from './components/farm/ZoneDetailModal';
-import { PrototypeNoticeModal } from './components/common/PrototypeNoticeModal';
+import { MinimalHowItWorks } from './components/common/MinimalHowItWorks';
+import { ZoneDetailModal } from './components/views/ZoneDetailModal';
+import { FarmAssistantChatbot } from './components/app/FarmAssistantChatbot';
+import { ScalabilityModal } from './components/app/ScalabilityModal';
 
-// Pages
-import { DashboardPage } from './pages/DashboardPage';
-import { FarmMonitoringPage } from './pages/FarmMonitoringPage';
-import { EdgeAiPage } from './pages/EdgeAiPage';
-import { IrrigationPage } from './pages/IrrigationPage';
-import { AnalyticsPage } from './pages/AnalyticsPage';
-import { AlertsPage } from './pages/AlertsPage';
-import { AiAdvisoryPage } from './pages/AiAdvisoryPage';
-import { AskAiPage } from './pages/AskAiPage';
+// Views
+import { DashboardView } from './components/views/DashboardView';
+import { MyFarmView } from './components/views/MyFarmView';
+import { ZonesView } from './components/views/ZonesView';
+import { CamerasView } from './components/views/CamerasView';
+import { SensorsView } from './components/views/SensorsView';
+import { AiInsightsView } from './components/views/AiInsightsView';
+import { IrrigationView } from './components/views/IrrigationView';
+import { ProblemsView } from './components/views/ProblemsView';
+import { SolutionsView } from './components/views/SolutionsView';
+import { EnvironmentView } from './components/views/EnvironmentView';
+import { AlertsView } from './components/views/AlertsView';
+import { AnalyticsView } from './components/views/AnalyticsView';
+import { SettingsView } from './components/views/SettingsView';
 
-import { Layers } from 'lucide-react';
+const MainAppContent: React.FC = () => {
+  const { isLoggedIn, currentView } = useFarm();
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState<boolean>(false);
 
-const MainContent: React.FC = () => {
-  const { 
-    activeTab, 
-    selectedCameraZone, 
-    closeCameraFeed, 
-    selectedZoneDetail, 
-    closeZoneDetail,
-    setShowArchitectureModal 
-  } = useFarm();
+  // If farmer is not logged in, display Welcome Screen (Section 5)
+  if (!isLoggedIn) {
+    return (
+      <>
+        <WelcomeScreen />
+        <ToastContainer />
+      </>
+    );
+  }
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const renderActiveTab = () => {
-    switch (activeTab) {
+  // Active view renderer for all 13 farm views
+  const renderCurrentView = () => {
+    switch (currentView) {
       case 'dashboard':
-        return <DashboardPage />;
-      case 'monitoring':
-        return <FarmMonitoringPage />;
-      case 'edge-ai':
-        return <EdgeAiPage />;
+        return <DashboardView />;
+      case 'my-farm':
+        return <MyFarmView />;
+      case 'zones':
+        return <ZonesView />;
+      case 'cameras':
+        return <CamerasView />;
+      case 'sensors':
+        return <SensorsView />;
+      case 'ai-insights':
+        return <AiInsightsView />;
       case 'irrigation':
-        return <IrrigationPage />;
-      case 'analytics':
-        return <AnalyticsPage />;
+        return <IrrigationView />;
+      case 'problems':
+        return <ProblemsView />;
+      case 'solutions':
+        return <SolutionsView />;
+      case 'environment':
+        return <EnvironmentView />;
       case 'alerts':
-        return <AlertsPage />;
-      case 'advisory':
-        return <AiAdvisoryPage />;
-      case 'ask-ai':
-        return <AskAiPage />;
+        return <AlertsView />;
+      case 'analytics':
+        return <AnalyticsView />;
+      case 'settings':
+        return <SettingsView />;
       default:
-        return <DashboardPage />;
+        return <DashboardView />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faf8] text-stone-900 flex flex-col antialiased">
-      {/* ================= MANDATORY SIH PROTOTYPE NOTICE BANNER ================= */}
-      <div className="bg-stone-900 text-white px-4 py-2 text-xs border-b border-stone-800 shrink-0">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span className="font-semibold text-amber-300">
-              Prototype Simulation – Hardware Integration Planned
-            </span>
-            <span className="hidden md:inline text-stone-400">
-              • Working software simulation with simulated sensor values & edge AI results for SIH Round-1
-            </span>
-          </div>
+    <div className="min-h-screen bg-[#f8faf8] text-stone-900 flex antialiased selection:bg-emerald-100 selection:text-emerald-900">
+      {/* Desktop Sidebar Navigation */}
+      <AppSidebar />
 
-          <button
-            onClick={() => setShowArchitectureModal(true)}
-            className="text-[11px] text-stone-300 hover:text-white underline font-medium flex items-center gap-1"
-          >
-            <Layers className="w-3 h-3 text-emerald-400" />
-            <span>View Prototype vs Future Hardware</span>
-          </button>
-        </div>
+      {/* Mobile Drawer & Bottom Quick Bar */}
+      <AppMobileNav 
+        drawerOpen={mobileDrawerOpen} 
+        onCloseDrawer={() => setMobileDrawerOpen(false)} 
+      />
+
+      {/* Main App Workspace */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        {/* Top Header */}
+        <AppHeader onOpenMobileMenu={() => setMobileDrawerOpen(true)} />
+
+        {/* View Workspace */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+          {renderCurrentView()}
+
+          {/* Minimal Bottom How-It-Works Strip (Section 31) */}
+          <MinimalHowItWorks />
+        </main>
       </div>
 
-      <div className="flex flex-1 relative">
-        {/* Desktop Sidebar (8 Navigation Tabs) */}
-        <Sidebar />
-
-        {/* Mobile Navigation Drawer */}
-        <MobileNav 
-          isOpen={isMobileMenuOpen} 
-          onClose={() => setIsMobileMenuOpen(false)} 
-        />
-
-        {/* Main Workspace Area */}
-        <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-6">
-          {/* Header Bar */}
-          <Header onOpenMobileMenu={() => setIsMobileMenuOpen(true)} />
-
-          {/* Tab Content Container */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-            {renderActiveTab()}
-          </main>
-        </div>
-      </div>
-
-      {/* Interactive Modals & Toast Alerts */}
+      {/* Modals & Real-time Global Elements */}
+      <ZoneDetailModal />
+      <ScalabilityModal />
+      <FarmAssistantChatbot />
       <ToastContainer />
-      <CameraFeedModal 
-        zoneId={selectedCameraZone} 
-        onClose={closeCameraFeed} 
-      />
-      <ZoneDetailModal 
-        zoneId={selectedZoneDetail} 
-        onClose={closeZoneDetail} 
-      />
-      <PrototypeNoticeModal />
     </div>
   );
 };
@@ -120,7 +110,7 @@ const MainContent: React.FC = () => {
 export function App() {
   return (
     <FarmProvider>
-      <MainContent />
+      <MainAppContent />
     </FarmProvider>
   );
 }

@@ -11,6 +11,14 @@
     --earth-200: #e8e8e1;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  section {
+    scroll-margin-top: 5rem;
+  }
+
   body {
     background-color: #f8faf8;
     color: #1c1917;
@@ -51,4 +59,3 @@
 .animate-soft-pulse {
   animation: softPulse 2.5s infinite ease-in-out;
 }
-
